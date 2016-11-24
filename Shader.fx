@@ -31,8 +31,13 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	vout.PosH = float4(vin.PosL, 1.0f);
 
+
+	float4x4 modelView = mul(viewMatrix, worldMatrix); 
+	float4x4 modelViewProjection = mul(projectionMatrix, modelView);
+	float4 pos = mul(modelViewProjection, float4(vin.PosL, 1.0f));
+
+	vout.PosH = pos;
 	vout.Color = float4(vin.Color, 1.0f);
 
 	return vout;

@@ -9,7 +9,8 @@
 #include <map>
 #include "LOG.h"
 #include "Mesh.h"
-#include "Buffer.h"
+#include "Object.h"
+#include "Camera.h"
 
 
 using namespace DirectX;
@@ -126,7 +127,8 @@ private:
 	HINSTANCE mInstanceHandle;
 	SWindowInfo mWindowInfo;
 
-	Buffer* buffer;
+	Object* obj;
+	Camera* cam;
 
 	std::vector<SShader *> mShaders;
 	std::string nameOfActualShader;

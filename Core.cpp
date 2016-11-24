@@ -85,17 +85,15 @@ HRESULT Core::compileShader(UINT id, std::string pathToVertexShader,
 	ID3D10Blob* errBlob;
 
 	HRESULT hr = D3DX11CompileFromFileA(pathToVertexShader.c_str(), 0, 0, "VS", "vs_4_0", flags, 0, 0, &vertBlob, &errBlob, 0);
-	if (FAILED(hr)) {
-		LOG::ERR("Compiling vertex shader failed!");
-		return hr;
-	}
 	if (errBlob != 0) {
 		LOG::ERR("Compiling vertex shader failed!\n%s", (char*)errBlob->GetBufferPointer());
 		errBlob->Release();
 		errBlob = NULL;
-		vertBlob->Release();
-		vertBlob = NULL;
 		return E_FAIL;
+	}
+	if (FAILED(hr)) {
+		LOG::ERR("Compiling vertex shader failed! HRESULT error.");
+		return hr;
 	}
 
 	ID3D11VertexShader* vertexShader;
@@ -238,7 +236,10 @@ SMesh * Core::loadMesh()
 
 HRESULT Core::updateAppConstantBuffer(SBPerApp * pData)
 {
-	return E_NOTIMPL;
+	mDeviceContext->UpdateSubresource(mBufferPerApp, 0, 0, (SBPerApp*)pData, 0, 0);
+	mDeviceContext->PSSetConstantBuffers(0, 1, &mBufferPerApp);
+
+	return S_OK;
 }
 
 HRESULT Core::updateFrameConstantBuffer(SBPerFrame * pData)
@@ -270,10 +271,14 @@ HRESULT Core::updateObjectConstantBuffer(SBPerObject * pData)
 int Core::loop()
 {
 	MSG msg = { 0 };
-	buffer = new Buffer();
+	obj = new Object();
 
 
-	buffer->initialize(loadMesh());
+	obj->init(loadMesh(), GDX_DYNAMIC_OBJ);
+	cam = new Camera();
+	cam->setUp({0.0f, 0.0f, 0.0f}, 0.01f, 100.0f, 800.0f, 600.0f, 45.0f);
+	cam->sendToShader();
+
 	while (WM_QUIT != msg.message)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -286,7 +291,9 @@ int Core::loop()
 			float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; 
 			mDeviceContext->ClearRenderTargetView(mRenderTargetView, ClearColor);
 
-			buffer->renderBuffer();
+			cam->update();
+			obj->update();
+			obj->draw();
 
 			mSwapChain->Present(0, 0);
 		}
