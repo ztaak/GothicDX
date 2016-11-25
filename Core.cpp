@@ -276,9 +276,9 @@ int Core::loop()
 
 	obj->init(loadMesh(), GDX_DYNAMIC_OBJ);
 	cam = new Camera();
-	cam->setUp({0.0f, 0.0f, 0.0f}, 0.01f, 100.0f, 800.0f, 600.0f, 45.0f);
+	cam->setUp({0.0f, 0.0f, 0.0f}, 0.01f, 100.0f, mWindowInfo.renderWidth, mWindowInfo.renderHeight, 45.0f);
 	cam->sendToShader();
-
+	obj->move({1.0f, 0.5f, 0.0f});
 	while (WM_QUIT != msg.message)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -292,10 +292,11 @@ int Core::loop()
 			mDeviceContext->ClearRenderTargetView(mRenderTargetView, ClearColor);
 
 			cam->update();
+			obj->rotateZ(0.01f);
 			obj->update();
 			obj->draw();
 
-			mSwapChain->Present(0, 0);
+			mSwapChain->Present(1, 0);
 		}
 	}
 	return (int)msg.wParam;

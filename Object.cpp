@@ -10,7 +10,83 @@ void Object::init(SMesh * mesh, GDX_OBJECT_TYPE type)
 {
 	mObjectType = type;
 	initialize(mesh);
-	XMStoreFloat4x4(&mWorldMatrix, DirectX::XMMatrixIdentity());
+	XMStoreFloat4x4(&mWorldMatrix, XMMatrixIdentity());
+	setMetrices({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f});
+	recalc = true;
+}
+
+void Object::setMetrices(XMFLOAT3 pos, XMFLOAT3 scale, XMFLOAT3 rotation)
+{
+	setPostition(pos);
+	setScale(scale);
+	setRotationX(rotation.x);
+	setRotationY(rotation.y);
+	setRotationZ(rotation.z);
+	recalc = true;
+}
+
+void Object::setPostition(XMFLOAT3 pos)
+{
+	mPos = pos;
+	recalc = true;
+}
+
+void Object::setScale(XMFLOAT3 scale)
+{
+	mScale = scale;
+	recalc = true;
+}
+
+void Object::setRotationX(float v)
+{
+	mRotation.x = v;
+	recalc = true;
+}
+
+void Object::setRotationY(float v)
+{
+	mRotation.y = v;
+	recalc = true;
+}
+
+void Object::setRotationZ(float v)
+{
+	mRotation.z = v;
+	recalc = true;
+}
+
+void Object::move(XMFLOAT3 v)
+{
+	mPos.x += v.x;
+	mPos.y += v.y;
+	mPos.z += v.z;
+	recalc = true;
+}
+
+void Object::scale(XMFLOAT3 v)
+{
+	mScale.x = v.x;
+	mScale.y = v.y;
+	mScale.z = v.z;
+	recalc = true;
+}
+
+void Object::rotateX(float v)
+{
+	mRotation.x += v;
+	recalc = true;
+}
+
+void Object::rotateY(float v)
+{
+	mRotation.y += v;
+	recalc = true;
+}
+
+void Object::rotateZ(float v)
+{
+	mRotation.z += v;
+	recalc = true;
 }
 
 void Object::draw()
@@ -23,13 +99,16 @@ void Object::update()
 	SBPerObject spObj;
 	ZeroMemory(&spObj, sizeof(spObj));
 
-	if (mObjectType == GDX_DYNAMIC_OBJ || mObjectType == GDX_DEFAULT_OBJ)
+	if ((mObjectType == GDX_DYNAMIC_OBJ || mObjectType == GDX_DEFAULT_OBJ) && recalc)
 	{
-		XMMATRIX temp = DirectX::XMMatrixIdentity();
-		temp = DirectX::XMMatrixTranslation(-1.0f, 0.0f, 0.0f);
-		//temp = XMMatrixScaling(2.0f, 5.0f, 1.0f);
-		//temp = XMMatrixTranspose(temp);
+		XMMATRIX temp = XMMatrixIdentity();
+		temp = XMMatrixMultiply(temp, XMMatrixRotationX(mRotation.x));
+		temp = XMMatrixMultiply(temp, XMMatrixRotationY(mRotation.y));
+		temp = XMMatrixMultiply(temp, XMMatrixRotationZ(mRotation.z));
+		temp = XMMatrixMultiply(temp, XMMatrixScaling(mScale.x, mScale.y, mScale.z));
+		temp = XMMatrixMultiply(temp, XMMatrixTranslation(mPos.x, mPos.y, mPos.z));
 		XMStoreFloat4x4(&mWorldMatrix, temp);
+		recalc = false;
 	}
 
 	spObj.worldMatrix = mWorldMatrix;
