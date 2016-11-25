@@ -192,41 +192,26 @@ SMesh * Core::loadMesh()
 {
 	SMesh* mesh = new SMesh();
 
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }));
-	//mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }));
 
-	//UINT indicies[36] =
-	//{
-	//	0, 1, 2, 0, 2, 3,
-	//	4, 6, 5, 4, 7, 6,
-	//	4, 5, 1, 4, 1, 0,
-	//	3, 2, 6, 3, 6, 7,
-	//	1, 5, 6, 1, 6, 2,
-	//	4, 0, 3, 4, 3, 7
-	//};
-
-	//for (int i = 0; i < 36; ++i) 
-	//{
-	//	mesh->indices.push_back(indicies[i]);
-	//}
-
-
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f) }));
-
-	UINT indicies[3] =
+	UINT indicies[36] =
 	{
-		0, 1, 2,
+		0, 1, 2, 0, 2, 3,
+		4, 6, 5, 4, 7, 6,
+		4, 5, 1, 4, 1, 0,
+		3, 2, 6, 3, 6, 7,
+		1, 5, 6, 1, 6, 2,
+		4, 0, 3, 4, 3, 7
 	};
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 36; ++i) 
 	{
 		mesh->indices.push_back(indicies[i]);
 	}
@@ -293,6 +278,16 @@ int Core::loop()
 		{
 			float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; 
 			mDeviceContext->ClearRenderTargetView(mRenderTargetView, ClearColor);
+			mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+			if (GetAsyncKeyState('W')) cam->move(0.4f);
+			if (GetAsyncKeyState('S')) cam->move(-0.4f);
+			if (GetAsyncKeyState('D')) cam->strafe(-0.4f);
+			if (GetAsyncKeyState('A')) cam->strafe(0.4f);
+			if (GetAsyncKeyState(VK_UP)) cam->pitch(2.5f);
+			if (GetAsyncKeyState(VK_DOWN)) cam->pitch(-2.5f);
+			if (GetAsyncKeyState(VK_RIGHT)) cam->yaw(-2.5f);
+			if (GetAsyncKeyState(VK_LEFT)) cam->yaw(2.5f);
 
 			cam->update();
 			OB("1")->rotateZ(0.01f);
@@ -408,19 +403,18 @@ HRESULT Core::createTargetAndDepthView()
 	dsd.ArraySize = 1;
 	dsd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsd.SampleDesc.Count = mWindowInfo.antialiasing;
-	dsd.SampleDesc.Quality = mWindowInfo.aaQuality;
+	dsd.SampleDesc.Quality = mWindowInfo.aaQuality - 1;
 	dsd.Usage = D3D11_USAGE_DEFAULT;
 	dsd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	dsd.CPUAccessFlags = 0;
 	dsd.MiscFlags = 0;
 
 	ID3D11Texture2D* depthStencilBuffer;
-	ID3D11DepthStencilView* depthStencilView;
 
 	hr = mDevice->CreateTexture2D(&dsd, 0, &depthStencilBuffer);
 	if (FAILED(hr)) return hr;
 
-	hr = mDevice->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
+	hr = mDevice->CreateDepthStencilView(depthStencilBuffer, 0, &mDepthStencilView);
 	if (FAILED(hr)) return hr;
 
 	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
