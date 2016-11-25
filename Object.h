@@ -2,6 +2,7 @@
 
 #include "Buffer.h"
 #include <DirectXMath.h>
+#include <string>
 
 enum GDX_OBJECT_TYPE 
 {
@@ -16,7 +17,11 @@ class Object : public Buffer
 {
 public:
 	Object();
+	Object(std::string tag, std::string group);
+
 	void init(SMesh* mesh, GDX_OBJECT_TYPE type);
+	void setTag(std::string tag);
+	void setGroup(std::string group);
 
 	void setMetrices(XMFLOAT3 pos, XMFLOAT3 scale, XMFLOAT3 rotation);
 	void setPostition(XMFLOAT3 pos);
@@ -40,6 +45,9 @@ private:
 	XMFLOAT3 mScale;
 	XMFLOAT3 mRotation;
 	bool recalc;
+	bool initialized;
 	GDX_OBJECT_TYPE mObjectType;
+	std::string mTag;
+	std::string mGroup;
 };
 

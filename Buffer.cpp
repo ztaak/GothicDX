@@ -46,7 +46,6 @@ void Buffer::renderBuffer()
 	UINT offset = 0;
 
 
-	Core::instance().bindShader(DEFAULT_SHADER_ID);
 	Core::instance().getDeviceContext()->IASetVertexBuffers(0, 1, &mpVertexBuffer, &stride, &offset);
 	Core::instance().getDeviceContext()->IASetIndexBuffer(mpIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	Core::instance().getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

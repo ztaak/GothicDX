@@ -9,7 +9,7 @@
 #include <map>
 #include "LOG.h"
 #include "Mesh.h"
-#include "Object.h"
+#include "ObjectManager.h"
 #include "Camera.h"
 
 
@@ -127,7 +127,6 @@ private:
 	HINSTANCE mInstanceHandle;
 	SWindowInfo mWindowInfo;
 
-	Object* obj;
 	Camera* cam;
 
 	std::vector<SShader *> mShaders;

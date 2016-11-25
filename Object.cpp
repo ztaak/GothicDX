@@ -4,6 +4,14 @@
 
 Object::Object()
 {
+	initialized = false;
+}
+
+Object::Object(std::string tag, std::string group)
+{
+	mTag = tag;
+	mGroup = group;
+	initialized = false;
 }
 
 void Object::init(SMesh * mesh, GDX_OBJECT_TYPE type)
@@ -13,6 +21,17 @@ void Object::init(SMesh * mesh, GDX_OBJECT_TYPE type)
 	XMStoreFloat4x4(&mWorldMatrix, XMMatrixIdentity());
 	setMetrices({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f});
 	recalc = true;
+	initialized = true;
+}
+
+void Object::setTag(std::string tag)
+{
+	mTag = tag;
+}
+
+void Object::setGroup(std::string group)
+{
+	mGroup = group;
 }
 
 void Object::setMetrices(XMFLOAT3 pos, XMFLOAT3 scale, XMFLOAT3 rotation)
@@ -91,28 +110,35 @@ void Object::rotateZ(float v)
 
 void Object::draw()
 {
-	renderBuffer();
+	if (!initialized)
+		LOG::DEB("Trying to draw object: '%s' in group: '%s' without initialization.", mTag, mGroup);
+	else {
+		SBPerObject spObj;
+		ZeroMemory(&spObj, sizeof(spObj));
+
+		spObj.worldMatrix = mWorldMatrix;
+		Core::instance().updateObjectConstantBuffer(&spObj);
+		renderBuffer();
+	}
 }
 
 void Object::update()
 {
-	SBPerObject spObj;
-	ZeroMemory(&spObj, sizeof(spObj));
-
-	if ((mObjectType == GDX_DYNAMIC_OBJ || mObjectType == GDX_DEFAULT_OBJ) && recalc)
-	{
-		XMMATRIX temp = XMMatrixIdentity();
-		temp = XMMatrixMultiply(temp, XMMatrixRotationX(mRotation.x));
-		temp = XMMatrixMultiply(temp, XMMatrixRotationY(mRotation.y));
-		temp = XMMatrixMultiply(temp, XMMatrixRotationZ(mRotation.z));
-		temp = XMMatrixMultiply(temp, XMMatrixScaling(mScale.x, mScale.y, mScale.z));
-		temp = XMMatrixMultiply(temp, XMMatrixTranslation(mPos.x, mPos.y, mPos.z));
-		XMStoreFloat4x4(&mWorldMatrix, temp);
-		recalc = false;
+	if (!initialized)
+		LOG::DEB("Trying to use object: '%s' in group: '%s' without initialization.", mTag, mGroup);
+	else {
+		if ((mObjectType == GDX_DYNAMIC_OBJ || mObjectType == GDX_DEFAULT_OBJ) && recalc)
+		{
+			XMMATRIX temp = XMMatrixIdentity();
+			temp = XMMatrixMultiply(temp, XMMatrixRotationX(mRotation.x));
+			temp = XMMatrixMultiply(temp, XMMatrixRotationY(mRotation.y));
+			temp = XMMatrixMultiply(temp, XMMatrixRotationZ(mRotation.z));
+			temp = XMMatrixMultiply(temp, XMMatrixScaling(mScale.x, mScale.y, mScale.z));
+			temp = XMMatrixMultiply(temp, XMMatrixTranslation(mPos.x, mPos.y, mPos.z));
+			XMStoreFloat4x4(&mWorldMatrix, temp);
+			recalc = false;
+		}
 	}
-
-	spObj.worldMatrix = mWorldMatrix;
-	Core::instance().updateObjectConstantBuffer(&spObj);
 }
 
 

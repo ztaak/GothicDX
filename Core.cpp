@@ -271,14 +271,17 @@ HRESULT Core::updateObjectConstantBuffer(SBPerObject * pData)
 int Core::loop()
 {
 	MSG msg = { 0 };
-	obj = new Object();
+	
+	ObjectManager::createNewAndInitialize("2", loadMesh(), GDX_DYNAMIC_OBJ);
+	OB("2")->move({ -3.0f, 2.5f, 0.0f });
+	ObjectManager::createNewAndInitialize("1", loadMesh(), GDX_DYNAMIC_OBJ);
+	OB("1")->move({ 1.0f, 0.5f, 0.0f });
 
-
-	obj->init(loadMesh(), GDX_DYNAMIC_OBJ);
+	
 	cam = new Camera();
 	cam->setUp({0.0f, 0.0f, 0.0f}, 0.01f, 100.0f, mWindowInfo.renderWidth, mWindowInfo.renderHeight, 45.0f);
 	cam->sendToShader();
-	obj->move({1.0f, 0.5f, 0.0f});
+
 	while (WM_QUIT != msg.message)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -292,9 +295,9 @@ int Core::loop()
 			mDeviceContext->ClearRenderTargetView(mRenderTargetView, ClearColor);
 
 			cam->update();
-			obj->rotateZ(0.01f);
-			obj->update();
-			obj->draw();
+			OB("1")->rotateZ(0.01f);
+			ObjectManager::updateAll();
+			ObjectManager::renderAll();
 
 			mSwapChain->Present(1, 0);
 		}
@@ -473,4 +476,3 @@ HRESULT Core::initializeConstantBuffers()
 
 	return hr;
 }
-
