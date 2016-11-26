@@ -253,19 +253,39 @@ HRESULT Core::updateObjectConstantBuffer(SBPerObject * pData)
 	return S_OK;
 }
 
+void Core::pushState(GameState* nState)
+{
+	if (mGameStates.size() > 0)
+		mGameStates.back()->onPause();
+	mGameStates.push_back(nState);
+	mGameStates.back()->onEnter();
+}
+
+void Core::changeState(GameState* nState)
+{
+	popState();
+	pushState(nState);
+}
+
+void Core::popState()
+{
+	if (mGameStates.size() > 1) {
+		mGameStates.back()->onExit();
+		mGameStates.pop_back();
+		mGameStates.back()->onUnPause();
+	}
+	else if (mGameStates.size() > 0) {
+		mGameStates.back()->onExit();
+		mGameStates.pop_back();
+	}
+}
+
 int Core::loop()
 {
 	MSG msg = { 0 };
 	
-	ObjectManager::createNewAndInitialize("2", loadMesh(), GDX_DYNAMIC_OBJ);
-	OB("2")->move({ -3.0f, 2.5f, 0.0f });
-	ObjectManager::createNewAndInitialize("1", loadMesh(), GDX_DYNAMIC_OBJ);
-	OB("1")->move({ 1.0f, 0.5f, 0.0f });
+	pushState(new TestState());
 
-	
-	cam = new Camera();
-	cam->setUp({0.0f, 0.0f, 0.0f}, 0.01f, 100.0f, mWindowInfo.renderWidth, mWindowInfo.renderHeight, 45.0f);
-	cam->sendToShader();
 
 	while (WM_QUIT != msg.message)
 	{
@@ -280,19 +300,11 @@ int Core::loop()
 			mDeviceContext->ClearRenderTargetView(mRenderTargetView, ClearColor);
 			mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-			if (GetAsyncKeyState('W')) cam->move(0.4f);
-			if (GetAsyncKeyState('S')) cam->move(-0.4f);
-			if (GetAsyncKeyState('D')) cam->strafe(-0.4f);
-			if (GetAsyncKeyState('A')) cam->strafe(0.4f);
-			if (GetAsyncKeyState(VK_UP)) cam->pitch(2.5f);
-			if (GetAsyncKeyState(VK_DOWN)) cam->pitch(-2.5f);
-			if (GetAsyncKeyState(VK_RIGHT)) cam->yaw(-2.5f);
-			if (GetAsyncKeyState(VK_LEFT)) cam->yaw(2.5f);
 
-			cam->update();
-			OB("1")->rotateZ(0.01f);
-			ObjectManager::updateAll();
-			ObjectManager::renderAll();
+			if (mGameStates.size() > 0) {
+				mGameStates.back()->update();
+				mGameStates.back()->render();
+			}
 
 			mSwapChain->Present(1, 0);
 		}

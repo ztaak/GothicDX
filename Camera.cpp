@@ -11,7 +11,7 @@ void Camera::setUp(XMFLOAT3 pos, float pNear, float pFar, float width, float hei
 	XMMATRIX tempProjMatrix = XMMatrixPerspectiveFovLH(fov, width / height, pNear, pFar);
 	XMStoreFloat4x4(&mProjMatrix, tempProjMatrix);
 
-	XMVECTOR tpos = XMVectorSet(0.0f, 0.0f, -8.0f, 1.0f);
+	XMVECTOR tpos = XMVectorSet(pos.x, pos.y, pos.z, 1.0f);
 	XMVECTOR target = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR right = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);

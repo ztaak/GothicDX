@@ -11,7 +11,11 @@
 #include "Mesh.h"
 #include "ObjectManager.h"
 #include "Camera.h"
+#include "TestState.h"
 
+#define GDX_WIDTH Core::instance().getSWindowInfo().renderWidth
+#define GDX_HEIGHT Core::instance().getSWindowInfo().renderHeight
+#define GDX_CORE Core::instance()
 
 using namespace DirectX;
 
@@ -102,6 +106,9 @@ public:
 	HRESULT updateAppConstantBuffer(SBPerApp * pData);
 	HRESULT updateFrameConstantBuffer(SBPerFrame * pData);
 	HRESULT updateObjectConstantBuffer(SBPerObject * pData);
+	void pushState(GameState* nState);
+	void changeState(GameState* nState);
+	void popState();
 	int loop();
 private:
 	Core();
@@ -127,7 +134,7 @@ private:
 	HINSTANCE mInstanceHandle;
 	SWindowInfo mWindowInfo;
 
-	Camera* cam;
+	std::vector<GameState*> mGameStates;
 
 	std::vector<SShader *> mShaders;
 	std::string nameOfActualShader;
