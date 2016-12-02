@@ -1,6 +1,6 @@
 #include "TestState.h"
 #include "Core.h"
-
+#include "ObjectManager.h"
 TestState::TestState()
 {
 }

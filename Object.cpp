@@ -1,5 +1,4 @@
 #include "Object.h"
-#include "Core.h"
 
 
 Object::Object()
@@ -20,6 +19,10 @@ void Object::init(SMesh * mesh, GDX_OBJECT_TYPE type)
 	initialize(mesh);
 	XMStoreFloat4x4(&mWorldMatrix, XMMatrixIdentity());
 	setMetrices({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f});
+
+	GDX_CORE.loadTexture("dirt.jpg");
+	mTexture = GDX_CORE.getTexture("dirt.jpg");
+
 	recalc = true;
 	initialized = true;
 }
@@ -117,7 +120,8 @@ void Object::draw()
 		ZeroMemory(&spObj, sizeof(spObj));
 
 		spObj.worldMatrix = mWorldMatrix;
-		Core::instance().updateObjectConstantBuffer(&spObj);
+		GDX_CORE.updateObjectConstantBuffer(&spObj);
+		GDX_CORE.bindTexture(&mTexture);
 		renderBuffer();
 	}
 }

@@ -6,9 +6,9 @@
 struct SVertex
 {
 	SVertex() {}
-	SVertex(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 col) : position(pos), color(col) {}
+	SVertex(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT2 cor) : position(pos), coord(cor) {}
 	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 color;
+	DirectX::XMFLOAT2 coord;
 };
 
 struct SMesh 

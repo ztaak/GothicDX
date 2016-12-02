@@ -38,6 +38,9 @@ public:
 		va_start(args, fmt);
 		std::string str{ argsToStr(fmt, args) };
 		va_end(args);
+
+		LPCSTR mess = str.c_str();
+		MessageBoxA(NULL, mess, "Debug", NULL);
 		
 	}
 };

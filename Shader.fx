@@ -18,14 +18,18 @@ cbuffer perObject : register(b2)
 struct VertexIn
 {
 	float3 PosL  : POSITION;
-	float3 Color : COLOR;
+	float2 Coord : COORD;
 };
 
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
-	float4 Color : COLOR;
+	float2 Coord : COORD;
 };
+
+Texture2D diffuseTex : register(t0);
+SamplerState samp : register(s0);
+
 
 VertexOut VS(VertexIn vin)
 {
@@ -38,12 +42,13 @@ VertexOut VS(VertexIn vin)
 	float4 pos = mul(modelViewProjection, float4(vin.PosL, 1.0f));
 
 	vout.PosH = pos;
-	vout.Color = float4(vin.Color, 1.0f);
+	vout.Coord = vin.Coord;
 
 	return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return pin.Color;
+	return diffuseTex.Sample(samp, pin.Coord);
+	//return pin.Coord;
 }

@@ -6,10 +6,11 @@
 #include <D3D11.h>
 #include <D3DX10.h>
 #include <DXGI.h>
+#include <IL\il.h>
+#include <IL\ilu.h>
 #include <map>
 #include "LOG.h"
 #include "Mesh.h"
-#include "ObjectManager.h"
 #include "Camera.h"
 #include "TestState.h"
 
@@ -17,9 +18,12 @@
 #define GDX_HEIGHT Core::instance().getSWindowInfo().renderHeight
 #define GDX_CORE Core::instance()
 
+typedef unsigned int GDX_SHADER;
+typedef ID3D11ShaderResourceView* GDX_TEXTURE;
+
 using namespace DirectX;
 
-static UINT DEFAULT_SHADER_ID;
+static GDX_SHADER DEFAULT_SHADER_ID;
 
 struct SWindowInfo {
 	float x;
@@ -99,9 +103,9 @@ public:
 	ID3D11DeviceContext* getDeviceContext() { return mDeviceContext; }
 	HRESULT compileShader(UINT id, std::string pathToVertexShader, 
 			std::string pathToPixelShader, D3D11_INPUT_ELEMENT_DESC* inputLayoutDesc, UINT ildElements);
-	UINT genShader();
-	HRESULT deleteShader(UINT id);
-	HRESULT bindShader(UINT id);
+	GDX_SHADER genShader();
+	HRESULT deleteShader(GDX_SHADER id);
+	HRESULT bindShader(GDX_SHADER id);
 	SMesh* loadMesh();
 	HRESULT updateAppConstantBuffer(SBPerApp * pData);
 	HRESULT updateFrameConstantBuffer(SBPerFrame * pData);
@@ -109,6 +113,10 @@ public:
 	void pushState(GameState* nState);
 	void changeState(GameState* nState);
 	void popState();
+	GDX_TEXTURE getTexture(std::string path);
+	HRESULT bindTexture(GDX_TEXTURE* texture);
+	HRESULT loadTexture(std::string path);
+	HRESULT unloadTexture(std::string path);
 	int loop();
 private:
 	Core();
@@ -119,6 +127,7 @@ private:
 	HRESULT createViewPort();
 	HRESULT createLayoutAndCompileShaders();
 	HRESULT initializeConstantBuffers();
+	HRESULT createAndUseDefaultSampler();
 
 	ID3D11Buffer* mBufferPerApp;
 	ID3D11Buffer* mBufferPerFrame;
@@ -129,15 +138,15 @@ private:
 	ID3D11RenderTargetView* mRenderTargetView;
 	ID3D11DepthStencilView* mDepthStencilView;
 	IDXGISwapChain* mSwapChain;
+	ID3D11SamplerState* mSamplerState;
 
 	HWND mWindowHandle;
 	HINSTANCE mInstanceHandle;
 	SWindowInfo mWindowInfo;
 
 	std::vector<GameState*> mGameStates;
-
-	std::vector<SShader *> mShaders;
-	std::string nameOfActualShader;
+	std::vector<SShader*> mShaders;
+	std::map<std::string, GDX_TEXTURE> mTextures;
 
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

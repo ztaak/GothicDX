@@ -69,6 +69,12 @@ HRESULT Core::initDirectX11()
 		LOG::ERR("Initailizing constant buffers failed!");
 		return E_FAIL;
 	}
+	if (FAILED(createAndUseDefaultSampler())) {
+		LOG::ERR("Creating default sampler failed!");
+		return E_FAIL;
+	}
+	ilInit();
+	iluInit();
 	return S_OK;
 }
 
@@ -130,10 +136,6 @@ HRESULT Core::compileShader(UINT id, std::string pathToVertexShader,
 	ID3D10Blob* pixBlob;
 
 	hr = D3DX11CompileFromFileA(pathToPixelShader.c_str(), 0, 0, "PS", "ps_4_0", flags, 0, 0, &pixBlob, &errBlob, 0);
-	if (FAILED(hr)) {
-		LOG::ERR("Compiling pixel shader failed!");
-		return hr;
-	}
 	if (errBlob != 0) {
 		LOG::ERR("Compiling pixel shader failed!\n%s", (char*)errBlob->GetBufferPointer());
 		errBlob->Release();
@@ -142,7 +144,10 @@ HRESULT Core::compileShader(UINT id, std::string pathToVertexShader,
 		pixBlob = NULL;
 		return E_FAIL;
 	}
-
+	if (FAILED(hr)) {
+		LOG::ERR("Compiling pixel shader failed!");
+		return hr;
+	}
 
 	ID3D11PixelShader* pixelShader;
 	hr = mDevice->CreatePixelShader(pixBlob->GetBufferPointer(), pixBlob->GetBufferSize(), NULL, &pixelShader);
@@ -164,19 +169,19 @@ HRESULT Core::compileShader(UINT id, std::string pathToVertexShader,
 	return S_OK;
 }
 
-UINT Core::genShader()
+GDX_SHADER Core::genShader()
 {
 	SShader* shaderAlloc = new SShader();
 	mShaders.push_back(shaderAlloc);
 	return mShaders.size() - 1;
 }
 
-HRESULT Core::deleteShader(UINT id)
+HRESULT Core::deleteShader(GDX_SHADER id)
 {
 	return E_NOTIMPL;
 }
 
-HRESULT Core::bindShader(UINT id)
+HRESULT Core::bindShader(GDX_SHADER id)
 {
 	SShader* s = mShaders[id];
 	if (s != nullptr) {
@@ -191,24 +196,49 @@ HRESULT Core::bindShader(UINT id)
 SMesh * Core::loadMesh()
 {
 	SMesh* mesh = new SMesh();
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }));
 
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f, -1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f,  1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f,  1.0f,  1.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f,  1.0f,  1.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) }));
-	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f,  1.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }));
 
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }));
+
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }));
+
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) }));
+
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) }));
+	mesh->vertices.push_back(SVertex({ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) }));
 	UINT indicies[36] =
 	{
-		0, 1, 2, 0, 2, 3,
-		4, 6, 5, 4, 7, 6,
-		4, 5, 1, 4, 1, 0,
-		3, 2, 6, 3, 6, 7,
-		1, 5, 6, 1, 6, 2,
-		4, 0, 3, 4, 3, 7
+		3,1,0,
+		2,1,3,
+		6,4,5,
+		7,4,6,
+		11,9,8,
+		10,9,11,
+		14,12,13,
+		15,12,14,
+		19,17,16,
+		18,17,19,
+		22,20,21,
+		23,20,22
 	};
 
 	for (int i = 0; i < 36; ++i) 
@@ -278,6 +308,114 @@ void Core::popState()
 		mGameStates.back()->onExit();
 		mGameStates.pop_back();
 	}
+}
+
+GDX_TEXTURE Core::getTexture(std::string path)
+{
+	if (mTextures[path] == nullptr) {
+		LOG::DEB("Texture '%s' not loaded!", path.c_str());
+		return nullptr;
+		//loadTexture(path);
+	}
+	return mTextures[path];
+}
+
+HRESULT Core::bindTexture(GDX_TEXTURE* texture)
+{
+	mDeviceContext->PSSetShaderResources(0, 1, texture);
+	return S_OK;
+}
+
+HRESULT Core::loadTexture(std::string path)
+{
+	if (mTextures[path] != nullptr) {
+		//LOG::DEB("Texture '%s' already loaded!", path.c_str());
+		return S_OK;
+	}
+	ILuint devilImage;
+	ilGenImages(1, &devilImage);
+	ilBindImage(devilImage);
+	std::wstring wPath = std::wstring(path.begin(), path.end());
+	ilEnable(IL_FORMAT_SET);
+	ilSetInteger(IL_FORMAT_MODE, IL_RGBA);
+	ilLoadImage(wPath.c_str());
+
+	ILenum ilErr;
+	ilErr = ilGetError();
+	if (ilErr != IL_NO_ERROR) {
+		LOG::DEB("Loading texture: '%s' failed! %d: %s", path.c_str(), ilErr, iluErrorString(ilErr));
+		ilDeleteImages(1, &devilImage);
+		return E_FAIL;
+	}
+
+	ILuint devilWidth, devilHeight;
+	devilWidth = ilGetInteger(IL_IMAGE_WIDTH);
+	devilHeight = ilGetInteger(IL_IMAGE_HEIGHT);
+	
+	ILuint devilBPP = ilGetInteger(IL_IMAGE_BPP);
+	ILuint devilBitsPP = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
+
+	if (devilBPP != 4) {
+		LOG::DEB("Wrong BPP in texture: '%s'", path.c_str());
+		return E_FAIL;
+	}
+	if (devilBitsPP != 32) {
+		LOG::DEB("Wrong bits per pixel in texture: '%s'", path.c_str());
+		return E_FAIL;
+	}
+
+	ILubyte *devilPixels = ilGetData();
+
+
+	//LOG::DEB("Width: %i, Height: %i, BPP: %i, BitsPerPixel: %i", devilWidth, devilHeight, devilBPP, devilBitsPP);
+	D3D11_TEXTURE2D_DESC t2d;
+	t2d.Width = (UINT)(devilWidth);
+	t2d.Height = (UINT)(devilHeight);
+	t2d.MipLevels = 1;
+	t2d.ArraySize = 1;
+	t2d.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	t2d.SampleDesc.Count = 1;
+	t2d.SampleDesc.Quality = 0;
+	t2d.Usage = D3D11_USAGE_DEFAULT;
+	t2d.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	t2d.CPUAccessFlags = 0;
+	t2d.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA sd;
+	sd.pSysMem = (void *)(devilPixels);
+	sd.SysMemPitch = devilWidth * devilBPP;
+	sd.SysMemSlicePitch = devilWidth * devilHeight * devilBPP;
+
+	ID3D11Texture2D* tempTexture;
+
+	HRESULT hr = mDevice->CreateTexture2D(&t2d, &sd, &tempTexture);
+	if (FAILED(hr)) {
+		LOG::ERR("Creating Texture2D from texture '%s' failed!", path.c_str());
+		ilDeleteImages(1, &devilImage);
+		return E_FAIL;
+	}
+
+	ID3D11ShaderResourceView* srvTexture;
+	hr = mDevice->CreateShaderResourceView(tempTexture, NULL, &srvTexture);
+	if (FAILED(hr)){
+		LOG::ERR("Can't create sahder resource view for texture: '%s'.", path.c_str());
+		tempTexture->Release();
+		tempTexture = nullptr;
+		return E_FAIL;
+	}
+	tempTexture->Release();
+	tempTexture = nullptr;
+	ilDeleteImages(1, &devilImage);
+
+
+	mTextures[path] = srvTexture;
+
+	return S_OK;
+}
+
+HRESULT Core::unloadTexture(std::string path)
+{
+	return E_NOTIMPL;
 }
 
 int Core::loop()
@@ -351,7 +489,10 @@ HRESULT Core::createSwapChain()
 		hr = mDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, mWindowInfo.antialiasing, &mWindowInfo.aaQuality);
 		if (FAILED(hr)) return hr;
 	}
-	else mWindowInfo.antialiasing = 1;
+	else {
+		mWindowInfo.antialiasing = 1;
+		mWindowInfo.aaQuality = 1;
+	}
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
@@ -454,7 +595,7 @@ HRESULT Core::createLayoutAndCompileShaders()
 	D3D11_INPUT_ELEMENT_DESC ildesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	DEFAULT_SHADER_ID = genShader();
@@ -481,4 +622,22 @@ HRESULT Core::initializeConstantBuffers()
 	if (FAILED(hr)) return hr;
 
 	return hr;
+}
+
+HRESULT Core::createAndUseDefaultSampler()
+{
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HRESULT hr = mDevice->CreateSamplerState(&sampDesc, &mSamplerState);
+	if (FAILED(hr))
+		return hr;
+	mDeviceContext->PSSetSamplers(0, 1, &mSamplerState);
+	return S_OK;
 }

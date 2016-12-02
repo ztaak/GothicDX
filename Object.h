@@ -3,6 +3,8 @@
 #include "Buffer.h"
 #include <DirectXMath.h>
 #include <string>
+#include "Core.h"
+
 
 enum GDX_OBJECT_TYPE 
 {
@@ -47,6 +49,7 @@ private:
 	bool recalc;
 	bool initialized;
 	GDX_OBJECT_TYPE mObjectType;
+	GDX_TEXTURE mTexture;
 	std::string mTag;
 	std::string mGroup;
 };
