@@ -13,18 +13,22 @@ Object::Object(std::string tag, std::string group)
 	initialized = false;
 }
 
-void Object::init(SMesh * mesh, GDX_OBJECT_TYPE type)
+void Object::init(GDX_MESH * mesh, GDX_OBJECT_TYPE type, std::string texturePath)
 {
 	mObjectType = type;
 	initialize(mesh);
 	XMStoreFloat4x4(&mWorldMatrix, XMMatrixIdentity());
 	setMetrices({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f});
 
-	GDX_CORE.loadTexture("dirt.jpg");
-	mTexture = GDX_CORE.getTexture("dirt.jpg");
+	mTexture = GDX_CORE.getTexture(texturePath);
 
 	recalc = true;
 	initialized = true;
+}
+
+void Object::setTexture(std::string path)
+{
+	mTexture = GDX_CORE.getTexture(path);
 }
 
 void Object::setTag(std::string tag)

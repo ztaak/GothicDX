@@ -16,13 +16,13 @@ void ObjectManager::createNew(std::string tag)
 
 }
 
-void ObjectManager::createNewAndInitialize(std::string tag, SMesh* mesh, GDX_OBJECT_TYPE type)
+void ObjectManager::createNewAndInitialize(std::string tag, SMesh* mesh, GDX_OBJECT_TYPE type, std::string texturePath)
 {
 	if (mObjList[mGroup][tag] != nullptr)
 		LOG::ERR("Error: Object with tag: %s, already exist!\n", tag.c_str());
 	else {
 		Object* tempObj = new Object();
-		tempObj->init(mesh, type);
+		tempObj->init(mesh, type, texturePath);
 		mObjList[mGroup][tag] = tempObj;
 	}
 

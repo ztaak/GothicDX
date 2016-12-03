@@ -21,7 +21,9 @@ public:
 	Object();
 	Object(std::string tag, std::string group);
 
-	void init(SMesh* mesh, GDX_OBJECT_TYPE type);
+	void init(GDX_MESH* mesh, GDX_OBJECT_TYPE type, std::string texturePath = "no_tex.bmp");
+	void setTexture(std::string path);
+
 	void setTag(std::string tag);
 	void setGroup(std::string group);
 

@@ -75,6 +75,7 @@ HRESULT Core::initDirectX11()
 	}
 	ilInit();
 	iluInit();
+	loadTexture("no_tex.bmp");
 	return S_OK;
 }
 
@@ -249,6 +250,11 @@ SMesh * Core::loadMesh()
 	return mesh;
 }
 
+GDX_MESH * Core::loadVDFMesh(std::string path)
+{
+	return nullptr;
+}
+
 HRESULT Core::updateAppConstantBuffer(SBPerApp * pData)
 {
 	mDeviceContext->UpdateSubresource(mBufferPerApp, 0, 0, (SBPerApp*)pData, 0, 0);
@@ -313,8 +319,8 @@ void Core::popState()
 GDX_TEXTURE Core::getTexture(std::string path)
 {
 	if (mTextures[path] == nullptr) {
-		LOG::DEB("Texture '%s' not loaded!", path.c_str());
-		return nullptr;
+		//LOG::DEB("Texture '%s' not loaded!", path.c_str());
+		return mTextures["no_tex.bmp"];
 		//loadTexture(path);
 	}
 	return mTextures[path];
@@ -332,10 +338,12 @@ HRESULT Core::loadTexture(std::string path)
 		//LOG::DEB("Texture '%s' already loaded!", path.c_str());
 		return S_OK;
 	}
+	std::string pref = "textures/";
 	ILuint devilImage;
 	ilGenImages(1, &devilImage);
 	ilBindImage(devilImage);
-	std::wstring wPath = std::wstring(path.begin(), path.end());
+	std::string endPath = pref + path;
+	std::wstring wPath = std::wstring(endPath.begin(), endPath.end());
 	ilEnable(IL_FORMAT_SET);
 	ilSetInteger(IL_FORMAT_MODE, IL_RGBA);
 	ilLoadImage(wPath.c_str());
@@ -628,7 +636,7 @@ HRESULT Core::createAndUseDefaultSampler()
 {
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;

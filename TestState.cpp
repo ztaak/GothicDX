@@ -15,8 +15,9 @@ void TestState::onEnter()
 	mCamera = new Camera();
 	mCamera->setUp({0.0f, 0.0f, -8.0f}, 0.01f, 100.0f, GDX_WIDTH, GDX_HEIGHT, 45.0f);
 	mCamera->sendToShader();
+	GDX_CORE.loadTexture("dirt.jpg");
 	ObjectManager::useGroup("test");
-	ObjectManager::createNewAndInitialize("1", GDX_CORE.loadMesh(), GDX_DYNAMIC_OBJ);
+	ObjectManager::createNewAndInitialize("1", GDX_CORE.loadMesh(), GDX_DYNAMIC_OBJ, "dirt.jpg");
 	ObjectManager::createNewAndInitialize("2", GDX_CORE.loadMesh(), GDX_DYNAMIC_OBJ);
 	OB("1")->move({2.5f, 0.0f, 0.5f});
 }

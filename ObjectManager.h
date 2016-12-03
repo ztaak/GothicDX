@@ -11,7 +11,7 @@ class ObjectManager
 {
 public:
 	static void createNew(std::string tag);
-	static void createNewAndInitialize(std::string tag, SMesh* mesh, GDX_OBJECT_TYPE type);
+	static void createNewAndInitialize(std::string tag, SMesh* mesh, GDX_OBJECT_TYPE type, std::string texturePath = "no_tex.bmp");
 	static void deleteObj(std::string tag);
 	static Object* getObj(std::string tag);
 	static Object* releaseObjFromList(std::string tag);

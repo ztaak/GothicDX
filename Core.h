@@ -19,6 +19,7 @@
 #define GDX_CORE Core::instance()
 
 typedef unsigned int GDX_SHADER;
+typedef SMesh GDX_MESH;
 typedef ID3D11ShaderResourceView* GDX_TEXTURE;
 
 using namespace DirectX;
@@ -106,7 +107,8 @@ public:
 	GDX_SHADER genShader();
 	HRESULT deleteShader(GDX_SHADER id);
 	HRESULT bindShader(GDX_SHADER id);
-	SMesh* loadMesh();
+	GDX_MESH* loadMesh();
+	GDX_MESH* loadVDFMesh(std::string path);
 	HRESULT updateAppConstantBuffer(SBPerApp * pData);
 	HRESULT updateFrameConstantBuffer(SBPerFrame * pData);
 	HRESULT updateObjectConstantBuffer(SBPerObject * pData);

@@ -11,7 +11,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wi.y = CW_USEDEFAULT;
 	wi.renderWidth = 1366.0f;
 	wi.renderHeight = 768.0f;
-	wi.antialiasing = 4;
 
 	if (FAILED(Core::instance().createWindow(hInstance, wi))) return -1;
 	if (FAILED(Core::instance().initDirectX11())) return -1;
